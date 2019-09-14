@@ -12,8 +12,9 @@ public class FileService {
     private static final String FILE_SEP = System.getProperty("file.separator");
     private static final String FILE_DIR = MAIN_DIR + FILE_SEP + "files";
 
+    private static Integer writeCounter;
 
-    private static void checkDir(){
+    private synchronized static void checkDir(){
         File file = new File(FILE_DIR);
         if (!file.exists()){
             file.mkdir();
@@ -22,7 +23,7 @@ public class FileService {
 
 
     //write info to file
-    public static void writeInfoToFile (ConnectionInfo connectionInfo, String fileName, boolean append, boolean newProcess){
+    public synchronized static void writeInfoToFile (ConnectionInfo connectionInfo, String fileName, boolean append, boolean newProcess){
         checkDir();
 
         try ( FileWriter fileWriter = new FileWriter(FILE_DIR + FILE_SEP + fileName, append) ){
@@ -33,13 +34,14 @@ public class FileService {
             fileWriter.flush();
         } catch (IOException e) {
             e.printStackTrace();
+            writeCounter +=1;
         }
     }
 
 
     //read info from file
 
-    public static List<ConnectionInfo> readInfoFromFile (String fileName) {
+    public synchronized static List<ConnectionInfo> readInfoFromFile (String fileName) {
         List<ConnectionInfo> result = new ArrayList<>();
         try (FileReader fileReader = new FileReader(FILE_DIR + FILE_SEP + fileName);
              BufferedReader bufferedReader = new BufferedReader(fileReader))
